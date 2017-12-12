@@ -8,9 +8,10 @@ var colors = require('colors/safe');
 var slug = require('slug');
 var path = require('path');
 var fs = require('fs');
-
+var config = require('config');
 var config_filename = '.migrate.json';
 var config_path = process.cwd() + '/' + config_filename;
+var db_path =config.get('default');
 var CONFIG;
 
 program
@@ -56,7 +57,9 @@ function success(msg) {
 
 function loadConfiguration() {
   try {
-    return require(config_path);
+    var _config = require(config_path);
+     _config.connection = db_path;
+     return _config;
   } catch (e) {
     error('Missing ' + config_filename + ' file. Type `migrate init` to create.');
   }
@@ -72,29 +75,13 @@ function init() {
   if (fs.existsSync(config_path)) {
     error(config_filename + ' already exists!');
   }
-
-  var schema = {
-    properties: {
-      basepath: {
-        description: 'Enter migrations directory',
-        type: 'string',
-        default: 'migrations'
-      },
-      connection: {
-        description: 'Enter mongo connection string',
-        type: 'string',
-        required: true
-      }
-    }
-  };
-
-  prompt.start();
-  prompt.get(schema, function (error, result) {
     CONFIG = {
-      basepath: result.basepath,
-      connection: result.connection,
+      basepath: 'mongoMigration/mongoVersioningFiles',
+      connection:db_path,
       current_timestamp: 0,
-      models: {}
+      "models": {
+        "model": "mongoMigration/model.js"
+      }
     };
 
     var data = JSON.stringify(CONFIG, null, 2);
@@ -102,7 +89,6 @@ function init() {
 
     success(config_filename + ' file created!\nEdit it to include your models definitions');
     process.exit();
-  });
 }
 
 function createMigration(description) {
