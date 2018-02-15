@@ -11,7 +11,7 @@ var fs = require('fs');
 var config = require('config');
 var config_filename = '.migrate.json';
 var config_path = process.cwd() + '/' + config_filename;
-var db_path =config.get('default');
+var db_path = config.mongo.uri
 var CONFIG;
 
 program
